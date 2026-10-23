@@ -1,0 +1,54 @@
+
+---
+
+### 🔄 .github/workflows/ci.yml
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    name: ${{ matrix.os }} / ${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: gcc
+            cxx: g++-14
+            cc: gcc-14
+          - os: ubuntu-latest
+            compiler: clang
+            cxx: clang++-18
+            cc: clang-18
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install compilers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14 clang-18 ninja-build
+
+      - name: Configure
+        env:
+          CXX: ${{ matrix.cxx }}
+          CC: ${{ matrix.cc }}
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTS=ON \
+            -DBUILD_EXAMPLES=ON
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

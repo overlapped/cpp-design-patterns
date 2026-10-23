@@ -1,0 +1,78 @@
+cmake_minimum_required(VERSION 3.16)
+project(CppDesignPatterns LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+option(BUILD_TESTS "Build tests" ON)
+option(BUILD_EXAMPLES "Build examples" ON)
+
+# Header-only
+add_library(patterns INTERFACE)
+target_include_directories(patterns INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Google Test
+if(BUILD_TESTS)
+  enable_testing()
+  include(FetchContent)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG v1.14.0)
+  FetchContent_MakeAvailable(googletest)
+endif()
+
+# Хелпер для регистрации паттерна
+include(cmake/AddPattern.cmake)
+
+# Регистрация всех паттернов
+add_pattern(cpp11 singleton)
+add_pattern(cpp11 template_method)
+add_pattern(cpp11 visitor)
+add_pattern(cpp11 publisher_subscriber)
+add_pattern(cpp11 crtp)
+add_pattern(cpp11 bridge)
+add_pattern(cpp11 chain_of_responsibility)
+add_pattern(cpp11 facade)
+add_pattern(cpp11 state)
+add_pattern(cpp11 strategy)
+add_pattern(cpp11 abstract_factory)
+add_pattern(cpp11 builder)
+add_pattern(cpp11 prototype)
+add_pattern(cpp11 factory_method)
+add_pattern(cpp11 adapter)
+add_pattern(cpp11 decorator)
+add_pattern(cpp11 composite)
+add_pattern(cpp11 proxy)
+add_pattern(cpp11 flyweight)
+add_pattern(cpp11 command)
+add_pattern(cpp11 iterator)
+add_pattern(cpp11 mediator)
+add_pattern(cpp11 memento)
+add_pattern(cpp11 observer)
+
+add_pattern(cpp20 singleton)
+add_pattern(cpp20 template_method)
+add_pattern(cpp20 visitor)
+add_pattern(cpp20 publisher_subscriber)
+add_pattern(cpp20 crtp)
+add_pattern(cpp20 bridge)
+add_pattern(cpp20 chain_of_responsibility)
+add_pattern(cpp20 facade)
+add_pattern(cpp20 state)
+add_pattern(cpp20 strategy)
+add_pattern(cpp20 abstract_factory)
+add_pattern(cpp20 builder)
+add_pattern(cpp20 prototype)
+add_pattern(cpp20 factory_method)
+add_pattern(cpp20 adapter)
+add_pattern(cpp20 decorator)
+add_pattern(cpp20 composite)
+add_pattern(cpp20 proxy)
+add_pattern(cpp20 flyweight)
+add_pattern(cpp20 command)
+add_pattern(cpp20 iterator)
+add_pattern(cpp20 mediator)
+add_pattern(cpp20 memento)
+add_pattern(cpp20 observer)
