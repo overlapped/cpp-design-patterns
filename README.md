@@ -35,10 +35,9 @@
 
 ## 🗂️ Структура
 
-cpp11/<pattern>/{.hpp, example.cpp, test.cpp}
-cpp20/<pattern>/{.hpp, example.cpp, test.cpp}
-cmake/AddPattern.cmake # хелпер регистрации паттерна
-
+- cpp11/<pattern>/{.hpp, example.cpp, test.cpp}
+- cpp20/<pattern>/{.hpp, example.cpp, test.cpp}
+- cmake/AddPattern.cmake # хелпер регистрации паттерна
 
 ## 🛠️ Требования
 
@@ -59,4 +58,3 @@ cmake --build build --target test_cpp20_visitor
 ./build/test_cpp20_visitor
 ./build/example_cpp20_visitor
 ```
-
