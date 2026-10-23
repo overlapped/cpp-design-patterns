@@ -6,6 +6,8 @@
 
 ## 📚 Содержание
 
+### Паттерны
+
 | Паттерн | C++11 | C++20 | Категория |
 |---|---|---|---|
 | Singleton | ✅ | ✅ | Creational |
@@ -23,6 +25,7 @@
 | Chain of Responsibility | ✅ | ✅ | Behavioral |
 | Command | ✅ | ✅ | Behavioral |
 | Iterator | ✅ | ✅ | Behavioral |
+| Interpreter | ✅ | ✅ | Behavioral |
 | Mediator | ✅ | ✅ | Behavioral |
 | Memento | ✅ | ✅ | Behavioral |
 | Observer | ✅ | ✅ | Behavioral |
@@ -32,6 +35,14 @@
 | Visitor | ✅ | ✅ | Behavioral |
 | Publisher/Subscriber | ✅ | ✅ | Behavioral (variation) |
 | CRTP | ✅ | ✅ | Idiom |
+
+### Идиомы
+
+- RAII специально показан на «сырых» FILE* и std::mutex, чтобы было видно, что именно делает деструктор. В реальном коде используйте std::unique_ptr, std::lock_guard, std::fstream — они реализуют ту же идиому.
+- Rule of Five демонстрирует все пять специальных функций и copy-and-swap для operator=. Это даёт строгую гарантию исключений: если new бросит внутри копирующего конструктора tmp, исходный объект остаётся нетронутым.
+- Обе идиомы не зависят от стандарта (C++11 уже всё это поддерживает), поэтому лежат в idioms/, а не в cpp11//cpp20/. В C++20-версии можно было бы добавить std::span для доступа к данным или std::byte, но это уже вкусовщина, а не суть идиомы.
+- PImpl — единственная идиома, где нужен отдельный .cpp; остальные header-only. В таблице идиом её стоит пометить как «требует compilation unit».
+- NVI — это по сути Template Method, но на уровне идиомы: публичный невиртуальный метод задаёт контракт, приватный виртуальный — точку расширения. Хорошо смотрится рядом с RAII и Rule of Five как «база C++».
 
 ## 🗂️ Структура
 

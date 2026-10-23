@@ -51,6 +51,7 @@ add_pattern(cpp11 iterator)
 add_pattern(cpp11 mediator)
 add_pattern(cpp11 memento)
 add_pattern(cpp11 observer)
+add_pattern(cpp11 interpreter)
 
 add_pattern(cpp20 singleton)
 add_pattern(cpp20 template_method)
@@ -76,3 +77,25 @@ add_pattern(cpp20 iterator)
 add_pattern(cpp20 mediator)
 add_pattern(cpp20 memento)
 add_pattern(cpp20 observer)
+add_pattern(cpp20 interpreter)
+
+add_pattern(idioms raii)
+add_pattern(idioms rule_of_five)
+add_pattern(idioms nvi)
+
+add_library(idioms_pimpl STATIC idioms/pimpl/pimpl.cpp)
+target_include_directories(idioms_pimpl PUBLIC idioms/pimpl)
+target_link_libraries(idioms_pimpl PUBLIC patterns)
+
+if(BUILD_EXAMPLES)
+  add_executable(example_idioms_pimpl idioms/pimpl/example.cpp)
+  target_link_libraries(example_idioms_pimpl PRIVATE idioms_pimpl)
+endif()
+
+if(BUILD_TESTS)
+  add_executable(test_idioms_pimpl idioms/pimpl/test.cpp)
+  target_link_libraries(test_idioms_pimpl PRIVATE idioms_pimpl
+                                                  GTest::gtest_main)
+  include(GoogleTest)
+  gtest_discover_tests(test_idioms_pimpl)
+endif()
