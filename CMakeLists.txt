@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_package(Threads REQUIRED)
+
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(SANITIZE "Comma-separated sanitizers (e.g. address,undefined)" "")
@@ -97,6 +99,7 @@ add_pattern(arch state_machine)
 add_pattern(arch memory_pool)
 add_pattern(arch double_buffering)
 add_pattern(arch watchdog)
+add_pattern(arch active_object)
 
 add_library(idioms_pimpl STATIC idioms/pimpl/pimpl.cpp)
 target_include_directories(idioms_pimpl PUBLIC idioms/pimpl)
