@@ -1,5 +1,11 @@
 # C++ Design Patterns (C++11 & C++20)
 
+[![CI](https://github.com/overlapped/cpp-design-patterns/actions/workflows/ci.yml/badge.svg)](https://github.com/overlapped/cpp-design-patterns/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![C++11](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://en.cppreference.com/w/cpp/11)
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
+[![CMake](https://img.shields.io/badge/CMake-%E2%89%A53.25-064F8C.svg)](https://cmake.org)
+
 Коллекция сниппетов классических шаблонов проектирования (GoF + Publisher/Subscriber)
 на C++11 и C++20. Каждый паттерн — в отдельной папке со своей реализацией,
 примером использования и unit-тестами.
@@ -95,3 +101,13 @@ cmake --preset ci-asan
 cmake --build --preset ci-asan -j
 ctest --preset ci-asan
 ```
+
+## 📊 Статус
+
+| Что | Значение |
+|---|---|
+| Паттернов GoF | 23/23 |
+| Идиом | 8 |
+| Тестов | 91+ |
+| Стандарты | C++11, C++20 |
+| CI | GCC 14, Clang 18, ASan+UBSan |
