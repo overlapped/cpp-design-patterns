@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(CppDesignPatterns LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -89,6 +89,14 @@ add_pattern(idioms nvi)
 add_pattern(idioms copy_and_swap)
 add_pattern(idioms non_member_non_friend)
 add_pattern(idioms tag_dispatching)
+
+add_pattern(cpp23 result)
+add_pattern(cpp23 crtp)
+
+add_pattern(arch state_machine)
+add_pattern(arch memory_pool)
+add_pattern(arch double_buffering)
+add_pattern(arch watchdog)
 
 add_library(idioms_pimpl STATIC idioms/pimpl/pimpl.cpp)
 target_include_directories(idioms_pimpl PUBLIC idioms/pimpl)
