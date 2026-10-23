@@ -69,3 +69,29 @@ cmake --build build --target test_cpp20_visitor
 ./build/test_cpp20_visitor
 ./build/example_cpp20_visitor
 ```
+
+## 🧪 Sanitizers
+
+Локально:
+
+```bash
+cmake --preset ci-asan
+cmake --build --preset ci-asan -j
+ctest --preset ci-asan
+
+cmake -S . -B build/asan -DSANITIZE=address,undefined
+cmake --build build/asan -j
+ctest --test-dir build/asan --output-on-failure
+```
+
+### 🚀 Проверка
+
+```bash
+cmake --preset debug
+cmake --build --preset debug -j
+ctest --test-dir build/debug --output-on-failure
+
+cmake --preset ci-asan
+cmake --build --preset ci-asan -j
+ctest --preset ci-asan
+```
