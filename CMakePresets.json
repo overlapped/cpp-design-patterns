@@ -19,9 +19,11 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/release",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTS": "ON",
+        "BUILD_EXAMPLES": "ON"
+    }
+},
     {
       "name": "ci-asan",
       "displayName": "CI with ASan + UBSan",
@@ -41,6 +43,11 @@
     { "name": "ci-asan", "configurePreset": "ci-asan" }
   ],
   "testPresets": [
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "output": { "outputOnFailure": true }
+    },
     {
       "name": "ci-asan",
       "configurePreset": "ci-asan",
