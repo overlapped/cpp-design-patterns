@@ -1,0 +1,138 @@
+cmake_minimum_required(VERSION 3.16)
+project(CppDesignPatterns LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+find_package(Threads REQUIRED)
+
+option(BUILD_TESTS "Build tests" ON)
+option(BUILD_EXAMPLES "Build examples" ON)
+option(SANITIZE "Comma-separated sanitizers (e.g. address,undefined)" "")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(Sanitizers)
+
+# Header-only
+add_library(patterns INTERFACE)
+target_include_directories(patterns INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Google Test
+if(BUILD_TESTS)
+  enable_testing()
+  include(FetchContent)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG v1.14.0)
+  FetchContent_MakeAvailable(googletest)
+endif()
+
+# Хелпер для регистрации паттерна
+include(cmake/AddPattern.cmake)
+
+# Регистрация всех паттернов
+add_pattern(cpp11 singleton)
+add_pattern(cpp11 template_method)
+add_pattern(cpp11 visitor)
+add_pattern(cpp11 publisher_subscriber)
+add_pattern(cpp11 crtp)
+add_pattern(cpp11 bridge)
+add_pattern(cpp11 chain_of_responsibility)
+add_pattern(cpp11 facade)
+add_pattern(cpp11 state)
+add_pattern(cpp11 strategy)
+add_pattern(cpp11 abstract_factory)
+add_pattern(cpp11 builder)
+add_pattern(cpp11 prototype)
+add_pattern(cpp11 factory_method)
+add_pattern(cpp11 adapter)
+add_pattern(cpp11 decorator)
+add_pattern(cpp11 composite)
+add_pattern(cpp11 proxy)
+add_pattern(cpp11 flyweight)
+add_pattern(cpp11 command)
+add_pattern(cpp11 iterator)
+add_pattern(cpp11 mediator)
+add_pattern(cpp11 memento)
+add_pattern(cpp11 observer)
+add_pattern(cpp11 interpreter)
+
+add_pattern(cpp20 singleton)
+add_pattern(cpp20 template_method)
+add_pattern(cpp20 visitor)
+add_pattern(cpp20 publisher_subscriber)
+add_pattern(cpp20 crtp)
+add_pattern(cpp20 bridge)
+add_pattern(cpp20 chain_of_responsibility)
+add_pattern(cpp20 facade)
+add_pattern(cpp20 state)
+add_pattern(cpp20 strategy)
+add_pattern(cpp20 abstract_factory)
+add_pattern(cpp20 builder)
+add_pattern(cpp20 prototype)
+add_pattern(cpp20 factory_method)
+add_pattern(cpp20 adapter)
+add_pattern(cpp20 decorator)
+add_pattern(cpp20 composite)
+add_pattern(cpp20 proxy)
+add_pattern(cpp20 flyweight)
+add_pattern(cpp20 command)
+add_pattern(cpp20 iterator)
+add_pattern(cpp20 mediator)
+add_pattern(cpp20 memento)
+add_pattern(cpp20 observer)
+add_pattern(cpp20 interpreter)
+
+add_pattern(idioms raii)
+add_pattern(idioms rule_of_five)
+add_pattern(idioms nvi)
+add_pattern(idioms copy_and_swap)
+add_pattern(idioms non_member_non_friend)
+add_pattern(idioms tag_dispatching)
+add_pattern(idioms erase_remove)
+add_pattern(idioms scope_guard)
+add_pattern(idioms sfinae)
+
+add_pattern(cpp23 result)
+add_pattern(cpp23 crtp)
+
+add_pattern(arch state_machine)
+add_pattern(arch memory_pool)
+add_pattern(arch double_buffering)
+add_pattern(arch watchdog)
+add_pattern(arch active_object)
+
+add_pattern(principles kiss)
+add_pattern(principles dry)
+add_pattern(principles yagni)
+
+add_pattern(principles solid/srp)
+add_pattern(principles solid/ocp)
+add_pattern(principles solid/lsp)
+add_pattern(principles solid/isp)
+add_pattern(principles solid/dip)
+
+add_pattern(principles composition_over_inheritance)
+add_pattern(principles law_of_demeter)
+add_pattern(principles fail_fast)
+add_pattern(principles separation_of_concerns)
+add_pattern(principles least_astonishment)
+
+add_library(idioms_pimpl STATIC idioms/pimpl/pimpl.cpp)
+target_include_directories(idioms_pimpl PUBLIC idioms/pimpl)
+target_link_libraries(idioms_pimpl PUBLIC patterns)
+
+if(BUILD_EXAMPLES)
+  add_executable(example_idioms_pimpl idioms/pimpl/example.cpp)
+  target_link_libraries(example_idioms_pimpl PRIVATE idioms_pimpl)
+endif()
+
+if(BUILD_TESTS)
+  add_executable(test_idioms_pimpl idioms/pimpl/test.cpp)
+  target_link_libraries(test_idioms_pimpl PRIVATE idioms_pimpl
+                                                  GTest::gtest_main)
+  include(GoogleTest)
+  gtest_discover_tests(test_idioms_pimpl)
+endif()
