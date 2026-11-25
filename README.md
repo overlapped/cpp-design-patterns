@@ -5,6 +5,8 @@
 [![C++11](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://en.cppreference.com/w/cpp/11)
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
 [![CMake](https://img.shields.io/badge/CMake-%E2%89%A53.25-064F8C.svg)](https://cmake.org)
+![GCC 14+](https://img.shields.io/badge/GCC-14%2B-blue)
+![Clang 18+](https://img.shields.io/badge/Clang-18%2B-orange)
 
 Коллекция сниппетов классических шаблонов проектирования (GoF + Publisher/Subscriber), идиом C++ и принципов проектирования. Каждый паттерн — в отдельной папке со своей header-only реализацией, примером использования и unit-тестами на Google Test. Всё собирается CMake, есть пресеты для Debug / Release / ASan+UBSan.
 
