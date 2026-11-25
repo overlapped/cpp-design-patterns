@@ -20,21 +20,18 @@ jobs:
             cc: gcc-14
             preset: release
             sanitize: ""
-            extra_flags: ""
           - os: ubuntu-latest
             compiler: gcc
             cxx: g++-14
             cc: gcc-14
             preset: ci-asan
             sanitize: "address,undefined"
-            extra_flags: ""
           - os: ubuntu-latest
             compiler: clang
             cxx: clang++-18
             cc: clang-18
             preset: ci-asan
             sanitize: "address,undefined"
-            extra_flags: "-DCMAKE_CXX_FLAGS=-stdlib=libc++ -DCMAKE_EXE_LINKER_FLAGS=-stdlib=libc++"
 
     steps:
       - uses: actions/checkout@v4
@@ -42,13 +39,13 @@ jobs:
       - name: Install compilers and tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++-14 clang-18 ninja-build cmake libc++-18-dev libc++abi-18-dev
+          sudo apt-get install -y g++-14 clang-18 ninja-build cmake libc++-18-dev libc++abi-18-dev libunwind-dev
 
       - name: Configure
         env:
           CC: ${{ matrix.cc }}
           CXX: ${{ matrix.cxx }}
-        run: cmake --preset ${{ matrix.preset }} ${{ matrix.extra_flags }}
+        run: cmake --preset ${{ matrix.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }} -j
