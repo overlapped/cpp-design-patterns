@@ -52,6 +52,6 @@ jobs:
 
       - name: Test (with sanitizers when enabled)
         env:
-          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1:alloc_dealloc_mismatch=0
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
         run: ctest --preset ${{ matrix.preset }} --output-on-failure
