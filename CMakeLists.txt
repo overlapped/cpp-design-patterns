@@ -5,16 +5,21 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(SANITIZE "Comma-separated sanitizers (e.g. address,undefined)" "")
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  add_compile_options(-stdlib=libc++)
-  add_link_options(-stdlib=libc++)
+  # TSan на Clang с системным libc++ даёт ложные срабатывания,
+  # поэтому для TSan-сборок не форсируем libc++.
+  if(NOT SANITIZE MATCHES "thread")
+    add_compile_options(-stdlib=libc++)
+    add_link_options(-stdlib=libc++)
+  endif()
 endif()
 
 find_package(Threads REQUIRED)
 
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
-option(SANITIZE "Comma-separated sanitizers (e.g. address,undefined)" "")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Sanitizers)
@@ -26,12 +31,15 @@ target_include_directories(patterns INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 # Google Test
 if(BUILD_TESTS)
   enable_testing()
-  include(FetchContent)
-  FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG v1.14.0)
-  FetchContent_MakeAvailable(googletest)
+  find_package(GTest QUIET)
+  if(NOT GTest_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+      googletest
+      GIT_REPOSITORY https://github.com/google/googletest.git
+      GIT_TAG v1.14.0)
+    FetchContent_MakeAvailable(googletest)
+  endif()
 endif()
 
 # Хелпер для регистрации паттерна

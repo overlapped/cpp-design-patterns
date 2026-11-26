@@ -72,10 +72,10 @@ private:
         }
     }
 
-    std::thread worker_;
     std::mutex mtx_;
     std::condition_variable cv_;
     std::queue<Task> tasks_;
     bool stop_ = false;
     int value_ = 0;   // доступ только из worker_-потока
+    std::thread worker_;
 };
