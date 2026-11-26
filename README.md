@@ -1,18 +1,17 @@
-# C++ Design Patterns (C++11 & C++20)
+# C++ Design Patterns (C++11 & C++20 & C++23)
 
 [![CI](https://github.com/overlapped/cpp-design-patterns/actions/workflows/ci.yml/badge.svg)](https://github.com/overlapped/cpp-design-patterns/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![C++11](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://en.cppreference.com/w/cpp/11)
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
+[![C++23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](https://en.cppreference.com/w/cpp/23)
 [![CMake](https://img.shields.io/badge/CMake-%E2%89%A53.25-064F8C.svg)](https://cmake.org)
 ![GCC 14+](https://img.shields.io/badge/GCC-14%2B-blue)
 ![Clang 18+](https://img.shields.io/badge/Clang-18%2B-orange)
 
-Коллекция сниппетов классических шаблонов проектирования (GoF + Publisher/Subscriber), идиом C++ и принципов проектирования. Каждый паттерн — в отдельной папке со своей header-only реализацией, примером использования и unit-тестами на Google Test. Всё собирается CMake, есть пресеты для Debug / Release / ASan+UBSan.
+Коллекция сниппетов классических шаблонов проектирования (GoF + Publisher/Subscriber), идиом C++, принципов проектирования и архитектурных паттернов. Каждый паттерн — в отдельной папке со своей header-only реализацией, примером использования и unit-тестами на Google Test. Всё собирается CMake, есть пресеты для Debug / Release / ASan+UBSan / TSan.
 
-Цель репозитория — учебная: показать, как один и тот же паттерн выглядит на C++11 и на C++20 (с std::variant, concepts, std::unique_ptr, std::function и т.п.), и дать запускаемые примеры, а не «идеальный продакшн-код».
-
-## 📚 Содержание
+Цель репозитория — учебная: показать, как один и тот же паттерн выглядит на C++11, C++20 и C++23 (с `std::variant`, `concepts`, `std::unique_ptr`, `std::function`, `std::expected`, `std::generator` и т.п.), и дать запускаемые примеры, а не «идеальный продакшн-код».
 
 ## 🚀 Быстрый старт
 
@@ -36,7 +35,7 @@ ctest --test-dir build --output-on-failure
 ```text
 cpp-design-patterns/
 ├── CMakeLists.txt              # корневая сборка, регистрация всех паттернов
-├── CMakePresets.json           # debug / release / ci-asan
+├── CMakePresets.json           # debug / release / ci-asan / ci-tsan
 ├── cmake/
 │   ├── AddPattern.cmake        # хелпер: регистрирует example + test для паттерна
 │   └── Sanitizers.cmake        # enable_sanitizers(target)
@@ -45,15 +44,16 @@ cpp-design-patterns/
 │       ├── <pattern>.hpp
 │       ├── example.cpp
 │       └── test.cpp
-├── cpp20/                      # те же паттерны на C++20
-├── cpp23/                      # std::expected-подобный Result, deducing this
-├── idioms/                     # RAII, Rule of Five, NVI, PImpl, ...
-├── arch/                       # State Machine, Memory Pool, Double Buffering, ...
-├── principles/                 # KISS, DRY, YAGNI, SOLID, LoD, ...
-└── tests/                      # (опционально) общие тесты
+├── cpp20/                      # те же паттерны на C++20 + jthread_stop_token, atomic_ref, policy_based_design
+├── cpp23/                      # Result (std::expected), deducing this, generator, expression_templates
+├── idioms/                     # RAII, Rule of Five, NVI, PImpl, Type Erasure, ...
+├── arch/                       # State Machine, Memory Pool, Thread Pool, Circuit Breaker, Event Bus, ...
+├── principles/                 # KISS, DRY, YAGNI, SOLID, CQS, Hollywood Principle, ...
+└── docs/
+    └── notes.md                # длинные пояснения, вынесенные из README
 ```
 
-### 🎨 Паттерны
+## 🎨 Паттерны GoF
 
 | Паттерн | C++11 | C++20 | Категория |
 |---|---|---|---|
@@ -83,102 +83,139 @@ cpp-design-patterns/
 | Publisher/Subscriber | ✅ | ✅ | Behavioral (variation) |
 | CRTP | ✅ | ✅ | Idiom |
 
-### 🧩 Идиомы
+## 🧩 Идиомы (`idioms/`)
 
-- RAII специально показан на «сырых» FILE* и std::mutex, чтобы было видно, что именно делает деструктор. В реальном коде используйте std::unique_ptr, std::lock_guard, std::fstream — они реализуют ту же идиому.
-- Rule of Five демонстрирует все пять специальных функций и copy-and-swap для operator=. Это даёт строгую гарантию исключений: если new бросит внутри копирующего конструктора tmp, исходный объект остаётся нетронутым.
-- Обе идиомы не зависят от стандарта (C++11 уже всё это поддерживает), поэтому лежат в idioms/, а не в cpp11//cpp20/. В C++20-версии можно было бы добавить std::span для доступа к данным или std::byte, но это уже вкусовщина, а не суть идиомы.
-- PImpl — единственная идиома, где нужен отдельный .cpp; остальные header-only. В таблице идиом её стоит пометить как «требует compilation unit».
-- NVI — это по сути Template Method, но на уровне идиомы: публичный невиртуальный метод задаёт контракт, приватный виртуальный — точку расширения. Хорошо смотрится рядом с RAII и Rule of Five как «база C++».
-- Copy-and-Swap, Non-member Non-friend, Tag Dispatching, Erase-Remove, Scope Guard, SFINAE.
+| Идиома | Описание |
+|---|---|
+| RAII | На «сырых» `FILE*` и `std::mutex` — видно, что делает деструктор |
+| Rule of Five | Все пять специальных членов + copy-and-swap |
+| Rule of Zero | Ни одного специального члена — семантика выводится из полей |
+| NVI | Публичный невиртуальный контракт, приватная виртуальная точка расширения |
+| PImpl | Сокрытие реализации; единственная идиома, требующая `.cpp` |
+| Copy-and-Swap | `operator=` через копию + `swap`, строгая гарантия исключений |
+| Non-member Non-friend | Свободные функции, работающие через публичный интерфейс |
+| Tag Dispatching | Выбор перегрузки по типу-тегу (`iterator_category`) |
+| Erase-Remove | `v.erase(std::remove_if(...), v.end())` |
+| Scope Guard | Откат действия при выходе из scope |
+| SFINAE | `enable_if_t` / `void_t` для выбора перегрузки |
+| Virtual Constructor | `clone()` — виртуальный «конструктор копирования» |
+| Attorney-Client / Passkey | Гранулярный контроль доступа без `friend` |
+| EBO / `[[no_unique_address]]` | Экономия памяти на пустых компараторах/аллокаторах |
+| Hidden Friends | `friend` внутри класса для ADL и ускорения компиляции |
 
-### 📐 Принципы проектирования
+## 📐 Принципы проектирования (`principles/`)
 
-- Лежат в principles/. Каждый — с «плохим» и «хорошим» примером, тест проверяет, что рефакторинг не сломал поведение.
-- KISS, DRY, YAGNI
-- SOLID — srp/, ocp/, lsp/, isp/, dip/
-- Composition over Inheritance, Law of Demeter
-- Fail Fast, Separation of Concerns, Least Astonishment
+Каждый — с «плохим» и «хорошим» примером, тест проверяет, что рефакторинг не сломал поведение.
 
-### 🏗️ Архитектурные паттерны
+- **KISS**, **DRY**, **YAGNI**
+- **SOLID** — `srp/`, `ocp/`, `lsp/`, `isp/`, `dip/`
+- **Composition over Inheritance**, **Law of Demeter**
+- **Fail Fast**, **Separation of Concerns**, **Least Astonishment**
+- **Hollywood Principle** — «не звоните нам, мы позвоним вам»
+- **CQS** — Command-Query Separation
+- **Tell, Don't Ask** — логика там, где данные
 
-Лежат в arch/ (C++11 достаточно, поэтому не в cppXX/):
+## 🏗️ Архитектурные паттерны (`arch/`)
 
-- State Machine — std::array<Transition, N>, таблица переходов фиксирована на этапе компиляции (типично для embedded). dispatch возвращает bool — вызывающий знает, был ли переход.
-- Memory Pool — минималистичный free-list без потокобезопасности. reinterpret_cast<T*>(node->storage) корректен, потому что storage выровнен по alignof(T) через alignas(T).
-- Double Buffering — без потокобезопасности; в embedded атомарность обеспечивает железо (DMA + прерывание).
-- Watchdog — принимает time_point снаружи, поэтому детерминирован и тестируем без sleep. После срабатывания флаг «липкий»: сброс только через start() или kick().
-- Active Object — value_ трогает только worker-поток; клиенты получают доступ только через future. Потокобезопасно без единого atomic в публичном API.
+- **State Machine** — `std::array<Transition, N>`, таблица фиксирована на этапе компиляции; `dispatch` возвращает `bool`.
+- **Memory Pool** — минималистичный free-list без потокобезопасности; `alignas(T)` для выравнивания.
+- **Double Buffering** — без потокобезопасности; в embedded атомарность обеспечивает железо.
+- **Watchdog** — принимает `time_point` снаружи, детерминирован; «липкий» флаг после срабатывания.
+- **Active Object** — `value_` трогает только worker-поток; клиенты получают доступ через `future`.
+- **Thread Pool** — пул потоков с очередью задач и возвратом `std::future`.
+- **Monitor Object** — инкапсуляция `mutex` + `condition_variable` внутри объекта.
+- **Read-Write Lock** — `std::shared_mutex` против обычного `std::mutex`.
+- **Double-Checked Locking** — `std::atomic` + `memory_order`; объяснение, почему без атомиков UB.
+- **SPSC Ring Buffer** — lock-free очередь для одного производителя и одного потребителя.
+- **Circuit Breaker** — три состояния (`Closed`/`Open`/`HalfOpen`), быстрый fail при падении сервиса.
+- **Object Pool** — пул готовых объектов (например, соединений) с `acquire`/`release`.
+- **DI Container** — runtime-реестр фабрик, разрешение зависимостей по типу.
+- **Event Bus / Signal-Slot** — централизованная шина с RAII-хэндлом для отписки.
 
-## Замечания
+## ⚙️ C++20 / C++23
 
-- Result в C++23 становится идиоматичным благодаря std::expected и его монадическим операциям (and_then, transform, or_else). Это не «паттерн GoF», а современный подход к обработке ошибок, который часто ставят в один ряд с паттернами.
-- deducing this — это эволюция CRTP, а не отдельный паттерн. Но в образовательном репозитории логично показать его рядом с cpp20/crtp/, чтобы читатель увидел разницу: шаблонный базовый класс vs нешаблонный с this auto&&.
-- State Machine использует std::array<Transition, N> — таблица переходов фиксирована на этапе компиляции, что типично для embedded. Если хочется динамики — замените на std::vector и добавьте add_transition. dispatch возвращает bool, чтобы вызывающий код знал, был ли переход; это лучше, чем молча игнорировать невалидное событие.
-- Memory Pool — минималистичный free-list без потокобезопасности. В реальном embedded этого обычно достаточно (один поток/прерывание), но если понадобится — добавьте std::mutex или используйте lock-free free-list. reinterpret_cast<T*>(node->storage) корректен, потому что storage выровнен по alignof(T) через alignas(T).
-- Оба паттерна не зависят от стандарта (C++11 достаточно), поэтому лежат в arch/, а не в cppXX/. Это архитектурный слой, а не языковой.
-- Тест RespectsAlignment может показаться избыточным, но он ловит класс ошибок, который ASan не всегда видит (misaligned access) — полезно для embedded-контекста.
-- Double Buffering — без потокобезопасности, как и MemoryPool. Для многопоточного сценария либо используйте std::atomic-индексы, либо оберните в мьютекс; но тогда это уже другой паттерн (Active Object). В embedded double buffering часто делается через DMA и прерывание — там атомарность обеспечивает железо.
-- Watchdog специально принимает time_point снаружи. Это делает его детерминированным и тестируемым без sleep. В реальном коде поверх него пишется тонкая обёртка, которая берёт steady_clock::now() и вызывает kick/expired. Тест ExpiredIsSticky проверяет важное свойство: после срабатывания флаг не сбрасывается сам — сброс только через start() или kick().
-- Ключевое свойство Active Object: value_ трогает только worker_-поток. Клиенты никогда не получают прямой доступ — только через future. Это делает класс потокобезопасным без единого atomic в публичном API.
-- Деструктор должен дождаться рабочего потока (join) и опустошить очередь (или отменить задачи). В примере мы не отменяем задачи, а даём им выполниться — для коротких задач это проще. В реальном коде можно добавить флаг cancelled_ и проверять его в run().
-- std::packaged_task + std::function — стандартный способ «упаковать» задачу так, чтобы она могла вернуть значение через future. Обратите внимание: task захватывается в лямбду как shared_ptr, иначе она была бы уничтожена до выполнения.
-- Тест ConcurrentIncrementsFromManyThreads специально вызывает .get() после каждого increment(), чтобы гарантировать линейный порядок и проверить именно сериализацию, а не конкурентность. Если хочется проверить «настоящую» параллельность — уберите .get() и в конце дождитесь всех futures, но тогда порядок будет недетерминирован, и проверять надо только итоговую сумму.
-- ASan+UBSan здесь особенно полезны: гонки данных они не ловят (для этого нужен TSan), но use-after-free и утечки в std::thread/std::promise — вполне. Если хотите ловить гонки, добавьте отдельный пресет ci-tsan с -fsanitize=thread — но это уже следующая итерация.
+- **`std::jthread` + `std::stop_token`** (`cpp20/`) — кооперативная остановка, интеграция с `condition_variable_any`.
+- **`std::atomic_ref`** (`cpp20/`) — атомарный доступ к неатомарной переменной.
+- **Policy-Based Design** (`cpp20/`) — поведение через шаблонные политики + `concepts`.
+- **Result** (`cpp23/`) — `std::expected` и монадические операции.
+- **deducing this** (`cpp23/`) — эволюция CRTP без шаблонного базового класса.
+- **Generator** (`cpp23/`) — `std::generator` на корутинах, `co_yield`, рекурсивные генераторы.
+- **Expression Templates** (`cpp23/`) — ленивые вычисления над векторами без временных объектов.
 
 ## 🛠️ Требования
 
-- CMake ≥ 3.16
-- Компилятор с поддержкой C++20 (GCC ≥ 10, Clang ≥ 12, MSVC ≥ 19.29)
-- Python 3 (для `gtest_discover_tests`)
-
-Google Test подтягивается автоматически через `FetchContent`.
+- **CMake ≥ 3.25** (для `CMakePresets.json` версии 6; для ручной сборки достаточно 3.16)
+- Компилятор с поддержкой C++23: GCC ≥ 14, Clang ≥ 18 (с `libc++`), MSVC ≥ 19.29
+- Python 3 — для `gtest_discover_tests`
+- Google Test подтягивается автоматически через `FetchContent` (v1.14.0); если `libgtest-dev` установлен — используется системный
 
 ## 🚀 Сборка и тесты
 
-```bash
-cmake -S . -B build
-cmake --build build -j
-ctest --test-dir build --output-on-failure
+### Через пресеты (рекомендуется)
 
-cmake --build build --target test_cpp20_visitor
-./build/test_cpp20_visitor
+```bash
+cmake --preset debug        # build/debug, Debug + тесты + примеры
+cmake --build --preset debug -j"$(nproc)"
+ctest --preset debug --output-on-failure
+
+cmake --preset release      # build/release, Release + тесты + примеры
+cmake --build --preset release -j"$(nproc)"
+ctest --preset release --output-on-failure
+```
+
+### Вручную
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j"$(nproc)"
+ctest --test-dir build --output-on-failure
+```
+
+### Один паттерн
+
+```bash
+cmake --build build --target example_cpp20_visitor test_cpp20_visitor
 ./build/example_cpp20_visitor
+./build/test_cpp20_visitor
 ```
 
 ## 🧪 Sanitizers
 
-Локально:
-
 ```bash
+# ASan + UBSan
 cmake --preset ci-asan
-cmake --build --preset ci-asan -j
-ctest --preset ci-asan
+cmake --build --preset ci-asan -j"$(nproc)"
+ctest --preset ci-asan --output-on-failure
 
-cmake -S . -B build/asan -DSANITIZE=address,undefined
-cmake --build build/asan -j
-ctest --test-dir build/asan --output-on-failure
+# TSan (data races)
+cmake --preset ci-tsan
+cmake --build --preset ci-tsan -j"$(nproc)"
+ctest --preset ci-tsan --output-on-failure
 ```
 
-### 🚀 Проверка
-
-```bash
-cmake --preset debug
-cmake --build --preset debug -j
-ctest --test-dir build/debug --output-on-failure
-
-cmake --preset ci-asan
-cmake --build --preset ci-asan -j
-ctest --preset ci-asan
-```
+> ASan+UBSan ловят use-after-free, утечки и UB, но **не** гонки данных — для этого TSan. Clang + `libc++` + TSan даёт ложные срабатывания, поэтому `ci-tsan` собирается на GCC.
 
 ## 📊 Статус
 
 | Что | Значение |
 |---|---|
 | Паттернов GoF | 23/23 |
-| Идиом | 11 |
-| Принципов | 11 |
-| Тестов | 171+ |
+| Идиом | 15 |
+| Принципов | 13 |
+| Архитектурных паттернов | 14 |
+| C++20/23 фич | 7 |
+| Тестов | 250+ |
 | Стандарты | C++11, C++20, C++23 |
-| CI | GCC 14, Clang 18, ASan+UBSan |
+| CI | GCC 14 (Release, ASan+UBSan, TSan), Clang 18 (ASan+UBSan) |
+
+## 📝 Заметки и обоснования
+
+Длинные пояснения (почему `Result` в `cpp23/`, заметки по `arch/`, почему идиомы не в `cppXX/`) вынесены в [`docs/notes.md`](docs/notes.md), чтобы README оставался лёгким.
+
+## 🤝 Contributing
+
+См. [CONTRIBUTING.md](CONTRIBUTING.md). Коротко: новая папка `<std>/<pattern>/` с тремя файлами (`<pattern>.hpp`, `example.cpp`, `test.cpp`), одна строка `add_pattern(<std> <pattern>)` в корневом `CMakeLists.txt`, обновление таблицы в README.
+
+## 📄 License
+
+MIT — см. [LICENSE](LICENSE).

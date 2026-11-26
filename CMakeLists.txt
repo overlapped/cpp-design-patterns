@@ -31,7 +31,7 @@ target_include_directories(patterns INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 # Google Test
 if(BUILD_TESTS)
   enable_testing()
-  find_package(GTest QUIET)
+  find_package(GTest CONFIG QUIET)
   if(NOT GTest_FOUND)
     include(FetchContent)
     FetchContent_Declare(
